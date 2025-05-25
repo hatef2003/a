@@ -15,6 +15,14 @@ async def handle_connection(websocket):
     image_base64 = base64.b64encode(image_data).decode('utf-8')
     response = {"type": "response", "payload":image_base64}
     await websocket.send(json.dumps(response))
+    await asyncio.sleep(10)
+    await websocket.send(json.dumps(response))
+
+    try:
+        while True:
+            await asyncio.sleep(1)  # simulate doing nothing, keeping connection alive
+    except websockets.exceptions.ConnectionClosed:
+        print("Client disconnected.")
 
 async def main():
     # Start the server on 0.0.0.0:8125
