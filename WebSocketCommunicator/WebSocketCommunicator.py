@@ -32,7 +32,7 @@ class WebSocketWrapper:
         message = await self.receive()  
         try:
             json_message = json.loads(message)
-            print(f"Parsed JSON: {json_message}")
+            # print(f"Parsed JSON: {json_message}")
             return json_message
         except json.JSONDecodeError as e:
             raise ValueError(f"Failed to parse message as JSON: {message}") from e
