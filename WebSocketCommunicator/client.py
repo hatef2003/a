@@ -3,7 +3,7 @@ import json
 from WebSocketCommunicator import WebSocketWrapper
 
 async def main():
-    ws = WebSocketWrapper("localhost", 8125)
+    ws = WebSocketWrapper("192.168.43.8", 8125)
     await ws.connect()
 
     # Send JSON

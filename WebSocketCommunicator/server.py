@@ -13,9 +13,9 @@ async def handle_connection(websocket):
         await websocket.send(json.dumps(response))
 
 async def main():
-    # Start the server on localhost:8125
-    async with websockets.serve(handle_connection, "localhost", 8125):
-        print("WebSocket server started on ws://localhost:8125")
+    # Start the server on 0.0.0.0:8125
+    async with websockets.serve(handle_connection, "0.0.0.0", 8125):
+        print("WebSocket server started on ws://0.0.0.0:8125")
         await asyncio.Future()  # run forever
 
 asyncio.run(main())
