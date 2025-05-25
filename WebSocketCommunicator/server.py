@@ -5,12 +5,11 @@ import json
 from PIL import Image
 import io
 import base64
-
 async def handle_connection(websocket):
         # Respond with a simple message
-    with open("C:\\Users\\Hot-f\\Desktop\\photo_2025-05-13_17-43-47.jpg", "rb") as f:
+    with open("C:\\Users\\Hot-f\\Desktop\\New folder (6)\\pets.jpg", "rb") as f:
         image_data = f.read()
-    response = await ws.receive_json()
+    
     i = Image.open(io.BytesIO(image_data))
     # i.show()
     image_base64 = base64.b64encode(image_data).decode('utf-8')
