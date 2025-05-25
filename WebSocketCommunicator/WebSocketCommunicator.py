@@ -23,7 +23,7 @@ class WebSocketWrapper:
         if self.connection is None:
             raise RuntimeError("WebSocket is not connected.")
         message = await self.connection.recv()
-        print(f"Received: {message}")
+        # print(f"Received: {message}")
         return message
 
     async def receive_json(self) -> dict:
