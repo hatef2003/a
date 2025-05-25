@@ -17,7 +17,8 @@ async def main():
     image_bytes = base64.b64decode(image)
     # image= image.encode("utf-8")
     image = Image.open(io.BytesIO(image_bytes))
-    image.save("./a.jpg")
+    
+    image.show("./a.jpg")
     await ws.close()
 
 asyncio.run(main())
