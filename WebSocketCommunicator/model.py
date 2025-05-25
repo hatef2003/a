@@ -67,7 +67,7 @@ async def main():
     parser.add_argument('-m', '--model', required=True,
                         help='File path of .tflite file')
     parser.add_argument('-l', '--labels', help='File path of labels file')
-    
+
     parser.add_argument('-t', '--threshold', type=float, default=0.4,
                         help='Score threshold for detected objects')
     parser.add_argument('-o', '--output',
@@ -78,7 +78,9 @@ async def main():
 
     labels = read_label_file(args.labels) if args.labels else {}
     interpreter = make_interpreter(args.model)
+    interpreter2 = make_interpreter(args.model)
     interpreter.allocate_tensors()
+    interpreter2.allocate_tensors()
     ws = WebSocketWrapper("192.168.43.8", 8125)
     await ws.connect()
     while (1):
@@ -96,8 +98,10 @@ async def main():
         
         start = time.perf_counter()
         interpreter.invoke()
+        interpreter2.invoke()
         inference_time = time.perf_counter() - start
         objs = detect.get_objects(interpreter, args.threshold, scale)
+        objs = detect.get_objects(interpreter2, args.threshold, scale)
         print('%.2f ms' % (inference_time * 1000))
 
         print('-------RESULTS--------')

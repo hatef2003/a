@@ -14,9 +14,8 @@ async def handle_connection(websocket):
     # i.show()
     image_base64 = base64.b64encode(image_data).decode('utf-8')
     response = {"type": "response", "payload":image_base64}
-    await websocket.send(json.dumps(response))
-    await asyncio.sleep(10)
-    await websocket.send(json.dumps(response))
+    for i in range(1000):
+        await websocket.send(json.dumps(response))
 
     try:
         while True:
