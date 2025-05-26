@@ -16,6 +16,7 @@ async def main():
         response = await ws.receive_json()
 
         image = response["payload"]
+        print(len(image))
         image_bytes = base64.b64decode(image)
         # image= image.encode("utf-8")
         image = Image.open(io.BytesIO(image_bytes))
