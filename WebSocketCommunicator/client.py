@@ -5,7 +5,7 @@ from PIL import Image
 import io
 import base64
 async def main():
-    ws = WebSocketWrapper("192.168.43.8", 8125)
+    ws = WebSocketWrapper("192.168.43.249", 8125)
     await ws.connect()
 
     # Send JSON
