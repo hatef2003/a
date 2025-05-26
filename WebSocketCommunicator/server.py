@@ -1,10 +1,10 @@
-# server.py
 import asyncio
 import websockets
 import json
 from PIL import Image
 import io
 import base64
+import time  # Added for timing
 
 async def handle_connection(websocket):
     # Load and encode image once
@@ -16,13 +16,23 @@ async def handle_connection(websocket):
 
     try:
         for i in range(1000):
+            # Record time before sending
+            start_time = time.time()
+
             # Send image
             await websocket.send(json.dumps(response))
 
-            # TODO: Receive message and print the result
             try:
+                # Wait for response from client
                 message = await websocket.recv()
+
+                # Record time after receiving
+                end_time = time.time()
+
+                elapsed_time = end_time - start_time
                 print(f"Received from client: {message}")
+                print(f"Round-trip time: {elapsed_time:.6f} seconds")
+
             except websockets.exceptions.ConnectionClosed:
                 print("Client disconnected during message exchange.")
                 break
@@ -34,7 +44,6 @@ async def handle_connection(websocket):
         print("Client disconnected.")
 
 async def main():
-    # Start the server on 0.0.0.0:8125
     async with websockets.serve(handle_connection, "0.0.0.0", 8125):
         print("WebSocket server started on ws://0.0.0.0:8125")
         await asyncio.Future()  # run forever
