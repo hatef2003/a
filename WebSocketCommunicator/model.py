@@ -67,12 +67,13 @@ async def main():
         print('-------RESULTS--------')
         if not objs:
           print('No objects detected')
-
+        masage = ""
         for obj in objs:
-          print(labels.get(obj.id, obj.id))
-          print('  id:    ', obj.id)
-          print('  score: ', obj.score)
-          print('  bbox:  ', obj.bbox)
+          masage+=str(labels.get(obj.id, obj.id))
+          masage+=str('  id:    ', obj.id)
+          masage+=str('  score: ', obj.score)
+          masage+=str('  bbox:  ', obj.bbox)
+        ws.send(masage)
 
 
 

@@ -7,7 +7,7 @@ import io
 import base64
 async def handle_connection(websocket):
         # Respond with a simple message
-    with open("C:\\Users\\Hot-f\\Desktop\\New folder (6)\\pets.jpg", "rb") as f:
+    with open("C:\\Users\\sarag\\Desktop\\Hatef\\a\\pets.jpg", "rb") as f:
         image_data = f.read()
     
     i = Image.open(io.BytesIO(image_data))
