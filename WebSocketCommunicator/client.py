@@ -22,7 +22,7 @@ async def main():
 
         image.show("./a.jpg")
         i+=1
-        ws.send("AAAAA")
+        await ws.send("AAAAA")
 
     # await ws.close()
 
