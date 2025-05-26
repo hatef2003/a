@@ -18,10 +18,8 @@ async def handle_connection(websocket):
         for i in range(1000):
             # Record time before sending
             start_time = time.time()
-
             # Send image
-            await websocket.send("json.dumps(response)")
-            end_time = time.time()
+            await websocket.send(json.dumps(response))
 
             try:
                 # Wait for response from client
@@ -29,6 +27,7 @@ async def handle_connection(websocket):
 
                 # Record time after receiving
 
+                end_time = time.time()
                 elapsed_time = end_time - start_time
                 print(f"Received from client: {message}")
                 print(f"Round-trip time: {elapsed_time:.6f} seconds")

@@ -13,7 +13,7 @@ async def main():
     i = 0
     while (1):
         print(i)
-        response = await ws.receive_json()
+        response = await ws.receive()
 
         # image = response["payload"]
         # print(len(image))
