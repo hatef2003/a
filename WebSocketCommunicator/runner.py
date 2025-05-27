@@ -1,62 +1,58 @@
 import numpy as np
-from PIL import Image
 import tflite_runtime.interpreter as tflite
+from PIL import Image
 import time
 
-# === Load the Edge TPU model ===
-model_path = 'y5.tflite'
-interpreter = tflite.Interpreter(
-    model_path=model_path,
-    experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')]
-)
-interpreter.allocate_tensors()
+MODEL_PATH = "trueY8.tflite"
+LABEL_PATH = "Y.txt"
+IMAGE_PATH = "bus.jpg"  # your test image
 
-# === Get model input/output details ===
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+def load_labels(path):
+    with open(path, 'r') as f:
+        return {i: line.strip() for i, line in enumerate(f.readlines())}
 
-# Debug info
-print("Input details:", input_details)
-print("Output details:", output_details)
-print("------------------------------------------------------")
+def set_input_tensor(interpreter, image):
+    tensor_index = interpreter.get_input_details()[0]['index']
+    input_tensor = interpreter.tensor(tensor_index)()[0]
+    input_tensor[:, :] = image
 
-# === Load and preprocess the image ===
-image_path = 'pets.jpg'
-input_shape = input_details[0]['shape']      # [1, height, width, 3]
-height, width = input_shape[1], input_shape[2]
+def preprocess(image_path, input_shape):
+    image = Image.open(image_path).convert('RGB')
+    image = image.resize((input_shape[1], input_shape[2]))
+    return np.expand_dims(np.array(image, dtype=np.uint8), axis=0), image
 
-# Load image and convert to RGB
-image = Image.open(image_path).convert('RGB').resize((width, height))
-image_np = np.asarray(image, dtype=np.float32)
-
-# Get quantization parameters for input tensor
-scale, zero_point = input_details[0]['quantization']  # e.g., (0.017, 128)
-
-# Quantize image to int8
-input_data = image_np / scale + zero_point
-input_data = np.round(input_data).astype(np.int8)
-input_data = np.expand_dims(input_data, axis=0)  # Shape: [1, H, W, 3]
-
-
-# Confirm dtype
-for i in range(10):
-    print("input_data dtype:", input_data.dtype)
-
-    # === Set input tensor and run inference ===
-    interpreter.set_tensor(input_details[0]['index'], input_data)
-
-    start_time = time.time()
+def run_inference(interpreter, image):
+    set_input_tensor(interpreter, image)
     interpreter.invoke()
-    end_time = time.time()
 
-    # === Get and print the output ===
-    output_data = interpreter.get_tensor(output_details[0]['index'])
+    output_details = interpreter.get_output_details()
+    boxes = interpreter.get_tensor(output_details[0]['index'])[0]
+    classes = interpreter.get_tensor(output_details[1]['index'])[0]
+    scores = interpreter.get_tensor(output_details[2]['index'])[0]
 
-    print("Inference Time: {:.2f} ms".format((end_time - start_time) * 1000))
-    # print("Raw Output:", output_data)
+    return boxes, classes, scores
 
-# === Optional: post-process if classification ===
-if len(output_data.shape) == 2 or len(output_data.shape) == 1:
-    predicted_label = np.argmax(output_data)
-    confidence = np.max(output_data)
-    print(f"Predicted label: {predicted_label}, Confidence: {confidence:.2f}")
+def main():
+    labels = load_labels(LABEL_PATH)
+
+    # Load Edge TPU-compatible TFLite model
+    interpreter = tflite.Interpreter(model_path=MODEL_PATH,
+                                     experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
+    interpreter.allocate_tensors()
+
+    input_details = interpreter.get_input_details()
+    input_shape = input_details[0]['shape']
+
+    image_input, raw_image = preprocess(IMAGE_PATH, input_shape)
+
+    start = time.time()
+    boxes, classes, scores = run_inference(interpreter, image_input)
+    end = time.time()
+
+    print(f"Inference time: {end - start:.2f} seconds")
+    for i in range(len(scores)):
+        if scores[i] > 0.5:
+            print(f"Detected {labels[int(classes[i])]} with confidence {scores[i]:.2f}")
+
+if __name__ == '__main__':
+    main()
