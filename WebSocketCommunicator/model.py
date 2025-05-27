@@ -43,7 +43,7 @@ async def main():
     labels = read_label_file(args.labels) if args.labels else {}
     interpreter = make_interpreter(args.model)
     interpreter.allocate_tensors()
-    ws = WebSocketWrapper("192.168.43.249", 8125)
+    ws = WebSocketWrapper("192.168.43.8", 8125)
     await ws.connect()
     while (1):
 
