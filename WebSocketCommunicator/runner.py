@@ -34,9 +34,9 @@ def run_inference(interpreter, image):
     print("Number of output tensors:", len(output_details))
     for i, out in enumerate(output_details):
         print(f"Output {i}: shape={out['shape']}, dtype={out['dtype']}")
-    boxes = interpreter.get_tensor(output_details[0]['index'])[0]
-    classes = interpreter.get_tensor(output_details[1]['index'])[0]
-    scores = interpreter.get_tensor(output_details[2]['index'])[0]
+    # boxes = interpreter.get_tensor(output_details[0]['index'])[0]
+    # classes = interpreter.get_tensor(output_details[1]['index'])[0]
+    # scores = interpreter.get_tensor(output_details[2]['index'])[0]
 
     return 
 
