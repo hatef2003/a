@@ -53,7 +53,7 @@ class EdgeTPUModel:
         self.interpreter = None
         self.colors = Colors()  # create instance for 'from utils.plots import colors'
         
-        self.get_names(names_file)
+        # self.get_names(names_file)
         self.make_interpreter()
         self.get_image_size()
         
