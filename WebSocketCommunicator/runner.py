@@ -4,7 +4,7 @@ import tflite_runtime.interpreter as tflite
 import time
 
 # === Load the Edge TPU model ===
-model_path = 'y8.tflite'
+model_path = 'y5.tflite'
 interpreter = tflite.Interpreter(
     model_path=model_path,
     experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')]
