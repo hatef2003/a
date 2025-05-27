@@ -8,7 +8,7 @@ import time  # Added for timing
 
 async def handle_connection(websocket):
     # Load and encode image once
-    with open("C:\\Users\\sarag\\Desktop\\Hatef\\a\\pets.jpg", "rb") as f:
+    with open("C:\\Users\\Hot-f\\Desktop\\New folder (6)\\bus.jpg", "rb") as f:
         image_data = f.read()
     
     image_base64 = base64.b64encode(image_data).decode('utf-8')

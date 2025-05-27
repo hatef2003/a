@@ -73,7 +73,7 @@ async def main():
           masage+=str('  id:    ', obj.id)
           masage+=str('  score: ', obj.score)
           masage+=str('  bbox:  ', obj.bbox)
-        ws.send(masage)
+        await ws.send(masage)
 
 
 
