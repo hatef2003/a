@@ -11,7 +11,7 @@ from nms import non_max_suppression, non_max_suppresion_v8
 # import cv2
 import json
 
-from utils import plot_one_box, Colors, get_image_tensor
+from utils import  Colors, get_image_tensor
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("EdgeTPUModel")

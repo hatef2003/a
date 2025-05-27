@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 import numpy as np
-import cv2
+
 
 class Colors:
     # Ultralytics color palette https://ultralytics.com/
@@ -66,14 +66,12 @@ def get_image_tensor(img, max_size, debug=False):
     """
     Reshapes an input image into a square with sides max_size
     """
-    if type(img) is str:
-        img = cv2.imread(img)
+
     
     resized, pad = resize_and_pad(img, max_size)
     resized = resized.astype(np.float32)
     
-    if debug:
-        cv2.imwrite("intermediate.png", resized)
+
 
     # Normalise!
     resized /= 255.0
