@@ -9,7 +9,7 @@ from PIL import Image
 # Specify the TensorFlow model, labels, and image
 script_dir = pathlib.Path(__file__).parent.absolute()
 model_file = "./y8.tflite"
-# label_file = os.path.join(script_dir, 'imagenet_labels.txt')
+label_file = "Y.txt"
 image_file = "./bus.jpg"
 
 # Initialize the TF interpreter
@@ -26,4 +26,6 @@ interpreter.invoke()
 classes = classify.get_classes(interpreter, top_k=1)
 
 # Print the result
-print(classes)
+labels = dataset.read_label_file(label_file)
+for c in classes:
+  print('%s: %.5f' % (labels.get(c.id, c.id), c.score))
