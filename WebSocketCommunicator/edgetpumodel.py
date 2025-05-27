@@ -3,7 +3,7 @@ import os
 import sys
 import logging
 
-import yaml
+# import yaml
 import numpy as np
 import pycoral.utils.edgetpu as etpu
 from pycoral.adapters import common
