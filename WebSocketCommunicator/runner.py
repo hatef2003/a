@@ -23,9 +23,12 @@ print("------------------------------------------------------")
 image_path = 'pets.jpg'
 input_shape = input_details[0]['shape']
 height, width = input_shape[1], input_shape[2]
-
+# Preprocess image
 image = Image.open(image_path).convert('RGB').resize((width, height))
 input_data = np.asarray(image)
+input_data = np.expand_dims(input_data, axis=0).astype(np.int8)
+
+
 
 # Check if input type is quantized (uint8)
 if input_details[0]['dtype'] == np.uint8:
