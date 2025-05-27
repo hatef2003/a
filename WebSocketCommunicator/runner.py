@@ -3,7 +3,7 @@ from PIL import Image
 import tflite_runtime.interpreter as tflite
 import time
 
-# Load Edge TPU model
+# === Load the Edge TPU model ===
 model_path = 'trueY8.tflite'
 interpreter = tflite.Interpreter(
     model_path=model_path,
@@ -11,49 +11,50 @@ interpreter = tflite.Interpreter(
 )
 interpreter.allocate_tensors()
 
-# Get input and output details
+# === Get model input/output details ===
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
+# Debug info
 print("Input details:", input_details)
 print("Output details:", output_details)
 print("------------------------------------------------------")
 
-# Load and preprocess image
+# === Load and preprocess the image ===
 image_path = 'pets.jpg'
-input_shape = input_details[0]['shape']
+input_shape = input_details[0]['shape']      # [1, height, width, 3]
 height, width = input_shape[1], input_shape[2]
-# Preprocess image
+
+# Load image and convert to RGB
 image = Image.open(image_path).convert('RGB').resize((width, height))
-input_data = np.asarray(image)
-input_data = np.expand_dims(input_data, axis=0).astype(np.int8)
-print("Expected dtype:", input_details[0]['dtype'])  # should show <class 'numpy.int8'>
+image_np = np.asarray(image, dtype=np.float32)
 
+# Get quantization parameters for input tensor
+scale, zero_point = input_details[0]['quantization']  # e.g., (0.017, 128)
 
+# Quantize image to int8
+input_data = image_np / scale + zero_point
+input_data = np.round(input_data).astype(np.int8)
+input_data = np.expand_dims(input_data, axis=0)  # Shape: [1, H, W, 3]
 
-# Check if input type is quantized (uint8)
-if input_details[0]['dtype'] == np.uint8:
-    input_data = np.expand_dims(input_data, axis=0).astype(np.uint8)
-else:
-    input_data = np.expand_dims(input_data, axis=0).astype(np.float32)
-    # Optional: normalize if required by model
-    # input_data = (input_data - 127.5) / 127.5
+# Confirm dtype
+print("input_data dtype:", input_data.dtype)
 
-# Run inference
+# === Set input tensor and run inference ===
 interpreter.set_tensor(input_details[0]['index'], input_data)
+
 start_time = time.time()
 interpreter.invoke()
 end_time = time.time()
 
-# Get output
+# === Get and print the output ===
 output_data = interpreter.get_tensor(output_details[0]['index'])
 
-# Print inference result and time
 print("Inference Time: {:.2f} ms".format((end_time - start_time) * 1000))
-print("Raw output:", output_data)
+print("Raw Output:", output_data)
 
-# (Optional) Post-processing - depends on your model
-# If it's classification:
-predicted_label = np.argmax(output_data)
-confidence = np.max(output_data)
-print(f"Predicted label: {predicted_label}, Confidence: {confidence:.2f}")
+# === Optional: post-process if classification ===
+if len(output_data.shape) == 2 or len(output_data.shape) == 1:
+    predicted_label = np.argmax(output_data)
+    confidence = np.max(output_data)
+    print(f"Predicted label: {predicted_label}, Confidence: {confidence:.2f}")
