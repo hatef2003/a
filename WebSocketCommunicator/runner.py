@@ -23,14 +23,22 @@ def preprocess(image_path, input_shape):
 
 def run_inference(interpreter, image):
     set_input_tensor(interpreter, image)
+    
+    start = time.time()
+
     interpreter.invoke()
+    end = time.time()
+    print(f"Inference time: {end - start:.2f} seconds")
 
     output_details = interpreter.get_output_details()
-    boxes = interpreter.get_tensor(output_details[0]['index'])[0]
-    classes = interpreter.get_tensor(output_details[1]['index'])[0]
-    scores = interpreter.get_tensor(output_details[2]['index'])[0]
+    print("Number of output tensors:", len(output_details))
+    for i, out in enumerate(output_details):
+        print(f"Output {i}: shape={out['shape']}, dtype={out['dtype']}")
+    # boxes = interpreter.get_tensor(output_details[0]['index'])[0]
+    # classes = interpreter.get_tensor(output_details[1]['index'])[0]
+    # scores = interpreter.get_tensor(output_details[2]['index'])[0]
 
-    return boxes, classes, scores
+    return 
 
 def main():
     labels = load_labels(LABEL_PATH)
@@ -45,14 +53,11 @@ def main():
 
     image_input, raw_image = preprocess(IMAGE_PATH, input_shape)
 
-    start = time.time()
-    boxes, classes, scores = run_inference(interpreter, image_input)
-    end = time.time()
+    run_inference(interpreter, image_input)
 
-    print(f"Inference time: {end - start:.2f} seconds")
-    for i in range(len(scores)):
-        if scores[i] > 0.5:
-            print(f"Detected {labels[int(classes[i])]} with confidence {scores[i]:.2f}")
+    # for i in range(len(scores)):
+    #     if scores[i] > 0.5:
+    #         print(f"Detected {labels[int(classes[i])]} with confidence {scores[i]:.2f}")
 
 if __name__ == '__main__':
     main()
