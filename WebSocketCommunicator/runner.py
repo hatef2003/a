@@ -3,7 +3,7 @@ import tflite_runtime.interpreter as tflite
 from PIL import Image
 import time
 
-MODEL_PATH = "trueY8.tflite"
+MODEL_PATH = "edge.tflite"
 LABEL_PATH = "Y.txt"
 IMAGE_PATH = "bus.jpg"  # your test image
 
