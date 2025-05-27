@@ -9,8 +9,8 @@ import json
 
 import numpy as np
 from tqdm import tqdm
-import cv2
-import yaml
+# import cv2
+# import yaml
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     elif args.stream:
         logger.info("Opening stream on device: {}".format(args.device))
         
-        cam = cv2.VideoCapture(args.device)
+        # cam = cv2.VideoCapture(args.device)
         
         while True:
           try:
