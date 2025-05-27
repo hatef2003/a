@@ -27,6 +27,7 @@ height, width = input_shape[1], input_shape[2]
 image = Image.open(image_path).convert('RGB').resize((width, height))
 input_data = np.asarray(image)
 input_data = np.expand_dims(input_data, axis=0).astype(np.int8)
+print("Expected dtype:", input_details[0]['dtype'])  # should show <class 'numpy.int8'>
 
 
 
