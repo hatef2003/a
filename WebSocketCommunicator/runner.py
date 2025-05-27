@@ -26,4 +26,4 @@ interpreter.invoke()
 classes = classify.get_classes(interpreter, top_k=1)
 
 # Print the result
-print("class")
+print(classes)
