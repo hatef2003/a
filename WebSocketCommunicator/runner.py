@@ -10,7 +10,7 @@ from PIL import Image
 script_dir = pathlib.Path(__file__).parent.absolute()
 model_file = "./y8.tflite"
 label_file = "Y.txt"
-image_file = "./bus.jpg"
+image_file = "./pets.jpg"
 
 # Initialize the TF interpreter
 interpreter = edgetpu.make_interpreter(model_file)
