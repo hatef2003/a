@@ -24,7 +24,7 @@ async def handle_connection(websocket):
             try:
                 # Wait for response from client
                 message = await websocket.recv()
-
+                print (message)
                 # Record time after receiving
 
                 end_time = time.time()
