@@ -50,6 +50,8 @@ if __name__ == "__main__":
     print("asdasd")
     print(type(input_size))
     print(input_size)
+    while (True):
+        pass
     # if args.v8:
     #     x = (255*np.random.random((3,*input_size))).astype(np.int8)
     # else:
