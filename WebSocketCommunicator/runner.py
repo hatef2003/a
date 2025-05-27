@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw
 
 # Specify the model, labels, and image
 script_dir = pathlib.Path(__file__).parent.absolute()
-model_file = "./y8.tflite"
+model_file = "./trueY8.tflite"
 label_file = "Y.txt"
 image_file = "./bus.jpg"
 
