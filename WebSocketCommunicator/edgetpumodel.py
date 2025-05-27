@@ -8,7 +8,7 @@ import numpy as np
 import pycoral.utils.edgetpu as etpu
 from pycoral.adapters import common
 from nms import non_max_suppression, non_max_suppresion_v8
-import cv2
+# import cv2
 import json
 
 from utils import plot_one_box, Colors, get_image_tensor
@@ -274,6 +274,7 @@ class EdgeTPUModel:
                 with open(output_txt, 'w') as f:
                    json.dump(output, f, indent=1)
             if save_img:
-              cv2.imwrite(output_path, output_image)
+                print ("not supported")
+            #   cv2.imwrite(output_path, output_image)
             
         return det
