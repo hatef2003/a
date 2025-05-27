@@ -37,21 +37,23 @@ input_data = image_np / scale + zero_point
 input_data = np.round(input_data).astype(np.int8)
 input_data = np.expand_dims(input_data, axis=0)  # Shape: [1, H, W, 3]
 
+
 # Confirm dtype
-print("input_data dtype:", input_data.dtype)
+for i in range(10):
+    print("input_data dtype:", input_data.dtype)
 
-# === Set input tensor and run inference ===
-interpreter.set_tensor(input_details[0]['index'], input_data)
+    # === Set input tensor and run inference ===
+    interpreter.set_tensor(input_details[0]['index'], input_data)
 
-start_time = time.time()
-interpreter.invoke()
-end_time = time.time()
+    start_time = time.time()
+    interpreter.invoke()
+    end_time = time.time()
 
-# === Get and print the output ===
-output_data = interpreter.get_tensor(output_details[0]['index'])
+    # === Get and print the output ===
+    output_data = interpreter.get_tensor(output_details[0]['index'])
 
-print("Inference Time: {:.2f} ms".format((end_time - start_time) * 1000))
-print("Raw Output:", output_data)
+    print("Inference Time: {:.2f} ms".format((end_time - start_time) * 1000))
+    # print("Raw Output:", output_data)
 
 # === Optional: post-process if classification ===
 if len(output_data.shape) == 2 or len(output_data.shape) == 1:
