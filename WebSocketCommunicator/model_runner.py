@@ -12,6 +12,7 @@ import io
 import json
 import time
 from pathlib import Path
+from typing import Dict
 
 import numpy as np
 from PIL import Image
@@ -78,7 +79,7 @@ def preprocess_pil(img_pil: Image.Image, input_shape):
 # ------------------------------------------------------------------
 async def inference_loop(ws_url: str,
                          interpreter: tflite.Interpreter,
-                         labels: dict[str, str],
+                         labels: Dict[int, str],
                          conf_threshold: float):
     """
     Opens the websocket, then processes each inbound JSON message with key
@@ -92,6 +93,7 @@ async def inference_loop(ws_url: str,
     async with websockets.connect(ws_url) as ws:
         print(f"✅ Connected to {ws_url}")
         async for msg in ws:
+            start = time.perf_counter()
             try:
                 data = json.loads(msg)
                 b64_image = data["payload"]
@@ -109,9 +111,7 @@ async def inference_loop(ws_url: str,
             set_input_tensor(interpreter, input_tensor)
 
             # --- inference -----------------------------------------------------------
-            start = time.perf_counter()
             interpreter.invoke()
-            inf_ms = (time.perf_counter() - start) * 1000.0
 
             output_details = interpreter.get_output_details()
             output = interpreter.get_tensor(output_details[0]['index'])
@@ -131,7 +131,9 @@ async def inference_loop(ws_url: str,
 
             # --- send results ---------------------------------------------------------
             await ws.send(json.dumps({"detections": detections,
-                                      "inference_ms": round(inf_ms, 2)}))
+                                      # "inference_ms": round(inf_ms, 2)
+                                      }))
+            inf_ms = (time.perf_counter() - start) * 1000.0
             print(f"🖼️  {len(detections)} dets – {inf_ms:5.1f} ms sent")
 
 # ------------------------------------------------------------------
@@ -154,7 +156,7 @@ def parse_cli():
     return p.parse_args()
 
 
-def load_labels(path: str) -> dict[int, str]:
+def load_labels(path: str) -> Dict[int, str]:
     return {i: line.strip() for i, line in enumerate(Path(path).read_text().splitlines())}
 
 
