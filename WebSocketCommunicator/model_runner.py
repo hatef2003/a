@@ -67,7 +67,7 @@ def postprocess_yolo(output:       np.ndarray,
                      conf_thr:     float = 0.4,
                      iou_thr:      float = 0.5,
                      max_det:      int = 10,
-                     prefilter_k:  int = 100) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+                     prefilter_k:  int = 100) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     • Converts raw YOLO-v8 tensor to absolute-pixel xyxy boxes
     • Performs confidence filtering + top-K pre-selection + NMS
@@ -117,9 +117,12 @@ def preprocess_pil(img_pil: Image.Image, input_shape):
     Resize a PIL image to the model’s expected H × W and reformat
     to uint8 NHWC.
     """
-    h, w = input_shape[1], input_shape[2]  # input_shape = [1, H, W, C]
+    h, w = input_shape[2], input_shape[3]  # input_shape = [1, H, W, C]
     img_resized = img_pil.convert("RGB").resize((w, h))
-    tensor = np.expand_dims(np.asarray(img_resized, dtype=np.uint8), 0)
+    arr = np.asarray(img_resized, np.uint8)
+    img_transposed = np.transpose(arr , (2,0,1))    
+    tensor = np.expand_dims(img_transposed, 0)
+    #tensor.transpose(0,3,1,2)
     return tensor
 
 
@@ -155,7 +158,8 @@ async def inference_loop(ws_url: str,
             img_bytes = base64.b64decode(b64_image)
             pil_img   = Image.open(io.BytesIO(img_bytes))
             orig_w, orig_h = pil_img.size
-
+            
+            preprocess_time = time.perf_counter()
             input_tensor = preprocess_pil(pil_img,
                                           interpreter.get_input_details()[0]['shape'])
             set_input_tensor(interpreter, input_tensor)
@@ -169,37 +173,41 @@ async def inference_loop(ws_url: str,
             output = interpreter.get_tensor(output_details[0]['index'])
 
             postprocess_time = time.perf_counter()
-            boxes, classes, scores = postprocess_yolo(output,
-                                                    img_wh=(orig_w, orig_h),
-                                                    conf_thr=conf_threshold,
-                                                    iou_thr=0.5,
-                                                    max_det=10)
+            # boxes, classes, scores = postprocess_yolo(output,
+            #                                         img_wh=(orig_w, orig_h),
+            #                                         conf_thr=conf_threshold,
+            #                                         iou_thr=0.5,
+            #                                         max_det=10)
 
-            detections = [
-                {
-                    "label": labels.get(int(c), f"id_{int(c)}"),
-                    "class_id": int(c),
-                    "score": float(f"{s:.4f}"),
-                    "bbox": [int(x1), int(y1), int(x2), int(y2)]
-                }
-                for (x1, y1, x2, y2), c, s in zip(boxes, classes, scores)
-            ]
+            # detections = [
+            #     {
+            #         "label": labels.get(int(c), f"id_{int(c)}"),
+            #         "class_id": int(c),
+            #         "score": float(f"{s:.4f}"),
+            #         "bbox": [int(x1), int(y1), int(x2), int(y2)]
+            #     }
+            #     for (x1, y1, x2, y2), c, s in zip(boxes, classes, scores)
+            # ]
 
             # --- send results ---------------------------------------------------------
             send_time = time.perf_counter()
-            await ws.send(json.dumps({"detections": detections,
+            print(output_details[0].keys())
+            print(type(output_details[0]))
+            print(output[0])
+            await ws.send(json.dumps({"detections": float(output[0][0]),
                                       # "inference_ms": round(inf_ms, 2)
                                       }))
             finish_time = time.perf_counter()
-
             
-            rec_ms = decode_time - start_time
-            dec_ms = inference_time - decode_time
-            inf_ms = output_parse_time - inference_time
-            out_ms = postprocess_time - output_parse_time
-            pps_ms = send_time - postprocess_time
-            snd_ms = finish_time - send_time
-            print(f"🖼️  {len(detections)} dets – rec: {rec_ms}, dec: {dec_ms}, inf: {inf_ms}, out: {out_ms}, pps: {pps_ms}, snd: {snd_ms} (ms)")
+            rec_ms = (decode_time - start_time)*1000
+            dec_ms = (preprocess_time - decode_time)*1000
+            pre_ms = (inference_time - preprocess_time)*1000
+            inf_ms = (output_parse_time - inference_time)*1000
+            out_ms = (postprocess_time - output_parse_time)*1000
+            pps_ms = (send_time - postprocess_time)*1000
+            snd_ms = (finish_time - send_time)*1000
+            print(f"🖼 dets – rec: {rec_ms}, dec: {dec_ms}, pre: {pre_ms}, inf: {inf_ms}, out: {out_ms}, pps: {pps_ms}, snd: {snd_ms} (ms)")
+            # print(f"🖼  {len(detections)} dets – rec: {rec_ms}, dec: {dec_ms}, pre: {pre_ms}, inf: {inf_ms}, out: {out_ms}, pps: {pps_ms}, snd: {snd_ms} (ms)")
 
 # ------------------------------------------------------------------
 # ── Command-line entry - point ─────────────────────────────────────
