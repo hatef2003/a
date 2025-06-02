@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# ------------------------------------------------------------
-#  Coral-TPU websocket client:
-#    • receives base-64 images over a JSON websocket frame
-#    • performs YOLO-v8 object detection on the Edge-TPU
-#    • returns a JSON list of detections
-# ------------------------------------------------------------
 import argparse
 import asyncio
 import base64
@@ -68,11 +61,7 @@ def postprocess_yolo(output:       np.ndarray,
                      iou_thr:      float = 0.5,
                      max_det:      int = 10,
                      prefilter_k:  int = 100) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    • Converts raw YOLO-v8 tensor to absolute-pixel xyxy boxes
-    • Performs confidence filtering + top-K pre-selection + NMS
-    • Returns ≤ max_det boxes / class_ids / scores  (all np.ndarrays)
-    """
+
     W, H = img_wh
 
     out  = output.squeeze().T        # [N, 84]
@@ -81,14 +70,12 @@ def postprocess_yolo(output:       np.ndarray,
     cls_scores = cls_conf[np.arange(len(cls_conf)), cls_ids]
     scores = obj_conf * cls_scores
 
-    # 1️⃣ confidence filter
     mask = scores > conf_thr
     if not mask.any():
         return np.empty((0, 4), dtype=np.int16), np.empty(0, dtype=np.int16), np.empty(0)
 
     boxes, scores, cls_ids = boxes[mask], scores[mask], cls_ids[mask]
 
-    # 2️⃣ keep only the top-K highest scores before NMS (cuts work ~10×)
     idx = top_k(scores, prefilter_k)
     boxes, scores, cls_ids = boxes[idx], scores[idx], cls_ids[idx]
 
@@ -100,7 +87,6 @@ def postprocess_yolo(output:       np.ndarray,
     boxes_xyxy[:, 3] = (boxes[:, 1] + boxes[:, 3] / 2) * H
     boxes_xyxy = boxes_xyxy.astype(np.float32)
 
-    # 3️⃣ Non-Max-Suppression (global — keeps max_det)
     keep = nms(boxes_xyxy, scores, iou_thr=iou_thr, max_det=max_det)
 
     return boxes_xyxy[keep], cls_ids[keep], scores[keep]
@@ -112,10 +98,7 @@ def set_input_tensor(interpreter, image_tensor):
     interpreter.tensor(index)()[0][:] = image_tensor
 
 def preprocess_pil(img_pil: Image.Image, input_shape):
-    """
-    Resize a PIL image to the model’s expected H × W and reformat
-    to uint8 NHWC.
-    """
+
     h, w = input_shape[2], input_shape[3]  # input_shape = [1, H, W, C]
     img_resized = img_pil.convert("RGB").resize((w, h))
     arr = np.asarray(img_resized, np.uint8)
@@ -142,14 +125,14 @@ async def inference_loop(ws_url: str,
     in_h, in_w = interpreter.get_input_details()[0]['shape'][1:3]
 
     async with websockets.connect(ws_url) as ws:
-        print(f"✅ Connected to {ws_url}")
+        print(f" Connected to {ws_url}")
         async for msg in ws:
             start_time = time.perf_counter()
             try:
                 data = json.loads(msg)
                 b64_image = data["payload"]
             except (json.JSONDecodeError, KeyError):
-                print("⚠️  Received malformed message – skipping")
+                print("  Received malformed message – skipping")
                 continue
 
             # --- decode & preprocess -------------------------------------------------
@@ -205,8 +188,7 @@ rec_ms = (decode_time - start_time)*1000
             out_ms = (postprocess_time - output_parse_time)*1000
             pps_ms = (send_time - postprocess_time)*1000
             snd_ms = (finish_time - send_time)*1000
-            print(f"🖼 dets – rec: {rec_ms}, dec: {dec_ms}, pre: {pre_ms}, inf: {inf_ms}, out: {out_ms}, pps: {pps_ms}, snd: {snd_ms} (ms)")
-            # print(f"🖼  {len(detections)} dets – rec: {rec_ms}, dec: {dec_ms}, pre: {pre_ms}, inf: {inf_ms}, out: {out_ms}, pps: {pps_ms}, snd: {snd_ms} (ms)")
+            print(f" dets – rec: {rec_ms}, dec: {dec_ms}, pre: {pre_ms}, inf: {inf_ms}, out: {out_ms}, pps: {pps_ms}, snd: {snd_ms} (ms)")
 
 # ------------------------------------------------------------------
 # ── Command-line entry - point ─────────────────────────────────────
@@ -241,7 +223,7 @@ async def main_async():
                                          tflite.load_delegate("libedgetpu.so.1")
                                      ])
     interpreter.allocate_tensors()
-    print("✅ Model loaded and tensors allocated")
+    print(" Model loaded and tensors allocated")
 
     labels = load_labels(args.labels)
     ws_url = f"ws://{args.host}:{args.port}"
