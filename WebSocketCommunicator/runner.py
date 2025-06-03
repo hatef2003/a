@@ -3,7 +3,7 @@ import tflite_runtime.interpreter as tflite
 from PIL import Image
 import time
 
-MODEL_PATH = "../model_s_int8_static_edgetpu.tflite"
+MODEL_PATH = "../efficientnet-edgetpu-S_quant_embedding_extractor_edgetpu.tflite"
 LABEL_PATH = "Y.txt"
 IMAGE_PATH = "bus.jpg"  # your test image
 
