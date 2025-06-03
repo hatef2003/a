@@ -1,0 +1,14 @@
+Edge TPU Compiler version 16.0.384591198
+Input: model_s_int8_static.tflite
+Output: model_s_int8_static_edgetpu.tflite
+
+Operator                       Count      Status
+
+FULLY_CONNECTED                1          Mapped to Edge TPU
+LOGISTIC                       132        Mapped to Edge TPU
+DEPTHWISE_CONV_2D              30         Mapped to Edge TPU
+CONV_2D                        140        Mapped to Edge TPU
+SOFTMAX                        1          Mapped to Edge TPU
+MUL                            133        Mapped to Edge TPU
+MEAN                           31         Mapped to Edge TPU
+ADD                            36         Mapped to Edge TPU
