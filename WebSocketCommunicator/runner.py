@@ -55,16 +55,16 @@ def postprocess_yolov9(output, conf_threshold=0.5, iou_threshold=0.4):
 
 def run_inference(interpreter, image):
     set_input_tensor(interpreter, image)
-    
-    start = time.time()
+    for i in range(10):
+        start = time.time()
 
-    interpreter.invoke()
-    end = time.time()
-    print(f"Inference time: {end - start:.2f} seconds")
+        interpreter.invoke()
+        end = time.time()
+        print(f"Inference time: {end - start:.2f} seconds")
 
     # output_details = interpreter.get_output_details()
-    output_details = interpreter.get_output_details()
-    print(output_details) # shape [1, 84, 1344]
+    # output_details = interpreter.get_output_details()
+    # print(output_details) # shape [1, 84, 1344]
     return 
 
 def main():
