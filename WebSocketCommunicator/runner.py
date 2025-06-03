@@ -3,7 +3,7 @@ import tflite_runtime.interpreter as tflite
 from PIL import Image
 import time
 
-MODEL_PATH = "240_yolov8n_full_integer_quant_edgetpu.tflite"
+MODEL_PATH = "../model_s_int8_static_edgetpu.tflite"
 LABEL_PATH = "Y.txt"
 IMAGE_PATH = "bus.jpg"  # your test image
 
@@ -64,8 +64,8 @@ def run_inference(interpreter, image):
 
     # output_details = interpreter.get_output_details()
     output_details = interpreter.get_output_details()
-    output = interpreter.get_tensor(output_details[0]['index'])  # shape [1, 84, 1344]
-    return output
+    print(output_details) # shape [1, 84, 1344]
+    return 
 
 def main():
     labels = load_labels(LABEL_PATH)
